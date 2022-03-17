@@ -7,6 +7,8 @@ export default function Home() {
     e.preventDefault();
     router.push("/pokemon");
   }
+  console.log("current branch", process.env.BRANCH);
+  
   return (
     <>
       <Head>
