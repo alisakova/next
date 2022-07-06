@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import fetch from "node-fetch";
 import { App, ExpressReceiver } from '@slack/bolt';
 
 dotenv.config();
