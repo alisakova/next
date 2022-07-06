@@ -38,7 +38,7 @@ app.message(async ({ say }) => {
   await say("Hi :wave:");
 });
 
-app.command('/greet', async({body, ack}) => {
+app.command('/turn-on-build', async({body, ack}) => {
   ack();
   await app.client.chat.postEphemeral({
     token: process.env.SLACK_BOT_TOKEN,
