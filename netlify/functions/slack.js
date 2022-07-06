@@ -22,6 +22,10 @@ const parseRequestBody = (stringBody) => {
   }
 }
 
+app.message(async ({ say }) => {
+  await say("Hi :wave:");
+});
+
 exports.handler = async function(event, context) {
   const payload = parseRequestBody(event.body);
 
@@ -31,4 +35,19 @@ exports.handler = async function(event, context) {
       body: payload.challenge
     };
   }
+
+  const slackEvent = {
+    body: payload,
+    ack: async (response) => {
+      return new Promise((resolve, reject) => {
+        resolve();
+        return {
+          statusCode: 200,
+          body: response ?? ""
+        };
+      });
+    },
+  };
+
+  await app.processEvent(slackEvent);
 }
