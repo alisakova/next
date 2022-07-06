@@ -14,9 +14,21 @@ const app = new App({
   receiver: expressReceiver
 });
 
-const parseRequestBody = (stringBody) => {
+const parseRequestBody = (stringBody, contentType) => {
   try {
-    return JSON.parse(stringBody ?? "");
+    let inputStringBody = stringBody ?? "";
+    let result = {};
+
+    if (contentType && contentType === 'application/x-www-form-urlencoded') {
+      var keyValuePairs = inputStringBody.split('&');
+      keyValuePairs.forEach(function(pair) {
+        let individualKeyValuePair = pair.split('=');
+        result[individualKeyValuePair[0]] = decodeURIComponent(individualKeyValuePair[1] || '');
+      });
+      return JSON.parse(JSON.stringify(result));
+    } else {
+      return JSON.parse(inputStringBody);
+    }
   } catch {
     return undefined;
   }
@@ -37,7 +49,7 @@ app.command('/greet', async({body, ack}) => {
 });
 
 exports.handler = async function(event, context) {
-  const payload = parseRequestBody(event.body);
+  const payload = parseRequestBody(event.body, event.headers["content-type"]);
 
   if (payload && payload.type && payload.type === 'url_verification') {
     return {
