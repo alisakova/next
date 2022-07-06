@@ -38,14 +38,38 @@ app.message(async ({ say }) => {
   await say("Hi :wave:");
 });
 
+const TURN_ON_BUILD_PAYLOAD = {
+  build_settings: {
+    skip_prs: null,
+  },
+  cdp_enabled: false
+};
+
 app.command('/turn-on-build', async({body, ack}) => {
   ack();
-  await app.client.chat.postEphemeral({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel: body.channel_id,
-    text: "Greetings, user!" ,
-    user: body.user_id
-  });
+  try  {
+    fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+      method: "PUT",
+      headers: {
+        Authorization: process.env.BEARER_TOKEN,
+      },
+      body: JSON.stringify(TURN_ON_BUILD_PAYLOAD),
+    }).then(() => {
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: body.channel_id,
+        text: "Билд превью включился" ,
+        user: body.user_id
+      });
+    });
+  } catch (error) {
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.channel_id,
+      text: "Запрос не прошел, повторите позже" ,
+      user: body.user_id
+    });
+  }
 });
 
 exports.handler = async function(event, context) {
