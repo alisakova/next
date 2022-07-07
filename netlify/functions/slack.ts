@@ -259,7 +259,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
 export async function handler(event) {
   // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
-  const result = payload.payload ? parseRequestBody(payload.payload, event.headers["content-type"]) : payload;
+  const result = payload.payload ? parseRequestBody(Object.keys(payload.payload)[0], event.headers["content-type"]) : payload;
 
   if (payload && payload.type && payload.type === 'url_verification') {
     return {
