@@ -256,7 +256,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
 });
 
 export async function handler(event) {
-  // TODO проверять заголовки, что это точно слак, уточнить у девопсов
+  // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
 
   if (payload && payload.type && payload.type === 'url_verification') {
@@ -266,7 +266,7 @@ export async function handler(event) {
     };
   }
 
-  console.log(event);
+  console.log(payload);
 
   const slackEvent: ReceiverEvent = {
     body: payload,
