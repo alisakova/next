@@ -71,12 +71,20 @@ const TURN_OFF_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
-let timerId;
+app.command('/turn-off-build', async ({ body, ack }) => {
+  await app.client.chat.postEphemeral({
+    token: process.env.SLACK_BOT_TOKEN,
+    channel: body.channel_id,
+    text: "Билд превью автоматически выключился :new_moon_with_face",
+    user: body.user_id
+  });
+})
 
 app.command('/turn-on-build', async ({ body, ack }) => {
-  if (timerId) {
-    clearTimeout(timerId);
-  }
+
+  const currentDate = new Date();
+  const scheduledMessageDate = new Date(currentDate.getTime() + 60000);
+  const scheduledMessageTimestamp = Math.floor(scheduledMessageDate.getTime() / 1000).toFixed(0);
 
   ack();
 
@@ -96,31 +104,38 @@ app.command('/turn-on-build', async ({ body, ack }) => {
       user: body.user_id
     });
 
-    timerId = setTimeout(async () => {
-      try {
-        await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
-          method: "PUT",
-          headers: {
-            Authorization: process.env.BEARER_TOKEN,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
-        });
-        await app.client.chat.postEphemeral({
-          token: process.env.SLACK_BOT_TOKEN,
-          channel: body.channel_id,
-          text: "Билд превью автоматически выключился :new_moon_with_face",
-          user: body.user_id
-        });
-      } catch (error) {
-        await app.client.chat.postEphemeral({
-          token: process.env.SLACK_BOT_TOKEN,
-          channel: body.channel_id,
-          text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную :face_with_rolling_eyes:",
-          user: body.user_id
-        });
-      }
-    }, 60000);
+    await app.client.chat.scheduleMessage({
+      channel: body.channel_id,
+      post_at: scheduledMessageTimestamp,
+      text: '/turn-off-build',
+      user: body.user_id
+    });
+
+    // timerId = setTimeout(async () => {
+    //   try {
+    //     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+    //       method: "PUT",
+    //       headers: {
+    //         Authorization: process.env.BEARER_TOKEN,
+    //         "content-type": "application/json",
+    //       },
+    //       body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
+    //     });
+    //     await app.client.chat.postEphemeral({
+    //       token: process.env.SLACK_BOT_TOKEN,
+    //       channel: body.channel_id,
+    //       text: "Билд превью автоматически выключился :new_moon_with_face",
+    //       user: body.user_id
+    //     });
+    //   } catch (error) {
+    //     await app.client.chat.postEphemeral({
+    //       token: process.env.SLACK_BOT_TOKEN,
+    //       channel: body.channel_id,
+    //       text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную :face_with_rolling_eyes:",
+    //       user: body.user_id
+    //     });
+    //   }
+    // }, 60000);
 
   } catch (error) {
     await app.client.chat.postEphemeral({
