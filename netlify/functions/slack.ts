@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import fetch from "node-fetch";
-import { App, ExpressReceiver, ReceiverEvent } from '@slack/bolt';
+import { App, StaticSelectAction, ExpressReceiver, ReceiverEvent } from '@slack/bolt';
 
 dotenv.config();
 
@@ -120,10 +120,10 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.action('select-1', async ({ action, say, ack }) => {
+app.action({ action_id: 'select-1' }, async ({ payload, say, ack }) => {
   await ack();
   await say("Deploy preview for any merge request is on :fire:");
-  console.log(action);
+  console.log((payload as StaticSelectAction).selected_option);
 });
 
 app.command('/turn-on-build', async ({ body, ack }) => {
