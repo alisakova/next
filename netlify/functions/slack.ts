@@ -71,7 +71,13 @@ const TURN_OFF_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
+let timerId;
+
 app.command('/turn-on-build', async ({ body, ack }) => {
+  if (timerId) {
+    clearTimeout(timerId);
+  }
+
   ack();
 
   try {
@@ -86,11 +92,11 @@ app.command('/turn-on-build', async ({ body, ack }) => {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
       channel: body.channel_id,
-      text: "Билд превью включился",
+      text: "Билд превью включился :fire:",
       user: body.user_id
     });
 
-    setTimeout(async () => {
+    timerId = setTimeout(async () => {
       try {
         await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
           method: "PUT",
@@ -103,14 +109,14 @@ app.command('/turn-on-build', async ({ body, ack }) => {
         await app.client.chat.postEphemeral({
           token: process.env.SLACK_BOT_TOKEN,
           channel: body.channel_id,
-          text: "Билд превью автоматически выключился",
+          text: "Билд превью автоматически выключился :new_moon_with_face",
           user: body.user_id
         });
       } catch (error) {
         await app.client.chat.postEphemeral({
           token: process.env.SLACK_BOT_TOKEN,
           channel: body.channel_id,
-          text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную",
+          text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную :face_with_rolling_eyes:",
           user: body.user_id
         });
       }
@@ -120,7 +126,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
       channel: body.channel_id,
-      text: "Запрос не прошел, повторите позже",
+      text: "Запрос не прошел, повторите позже :face_with_rolling_eyes:",
       user: body.user_id
     });
   }
