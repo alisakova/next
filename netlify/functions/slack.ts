@@ -141,10 +141,8 @@ app.command('/start', async ({ say, body, ack }) => {
   // });
 });
 
-app.action('block_actions', async ({ payload, say, ack, body, logger }) => {
+app.action('button_click', async ({ payload, say, ack, body, logger }) => {
   ack();
-  logger.info(payload, body);
-  console.log(payload, body);
   await say("Deploy preview for any merge request is on :fire:");
 });
 
