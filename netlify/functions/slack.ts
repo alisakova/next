@@ -12,7 +12,8 @@ const expressReceiver = new ExpressReceiver({
 const app = new App({
   signingSecret: `${process.env.SLACK_SIGNING_SECRET}`,
   token: `${process.env.SLACK_BOT_TOKEN}`,
-  receiver: expressReceiver
+  receiver: expressReceiver,
+  endpoints: '/slack/actions',
 });
 
 const parseRequestBody = (stringBody: string | null, contentType: string | undefined): any | undefined => {
@@ -238,7 +239,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
 });
 
 export async function handler(event) {
-  // TODO проверять заголовки, что это точно слак
+  // TODO проверять заголовки, что это точно слак, уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
 
   if (payload && payload.type && payload.type === 'url_verification') {
