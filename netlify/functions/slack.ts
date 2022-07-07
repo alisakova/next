@@ -13,7 +13,6 @@ const app = new App({
   signingSecret: `${process.env.SLACK_SIGNING_SECRET}`,
   token: `${process.env.SLACK_BOT_TOKEN}`,
   receiver: expressReceiver,
-  endpoints: '/slack/actions',
 });
 
 const parseRequestBody = (stringBody: string | null, contentType: string | undefined): any | undefined => {
@@ -72,59 +71,79 @@ const TURN_OFF_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
-app.command('/start', async ({ body, ack }) => {
-  await app.client.chat.postEphemeral({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel: body.channel_id,
-    text: "TEST",
+app.command('/start', async ({ say, body, ack }) => {
+  await say({
     blocks: [
       {
         "type": "section",
-        "block_id": "section678",
         "text": {
           "type": "mrkdwn",
-          "text": "Pick a project from the dropdown list"
+          "text": `Hey there!`
         },
         "accessory": {
-          "action_id": "select-1",
-          "type": "static_select",
-          "placeholder": {
+          "type": "button",
+          "text": {
             "type": "plain_text",
-            "text": "Select an item"
+            "text": "Click Me"
           },
-          "options": [
-            {
-              "text": {
-                "type": "plain_text",
-                "text": "*Project 1*"
-              },
-              "value": "project-1"
-            },
-            {
-              "text": {
-                "type": "plain_text",
-                "text": "*Project 2*"
-              },
-              "value": "project-2"
-            },
-            {
-              "text": {
-                "type": "plain_text",
-                "text": "*Project 3*"
-              },
-              "value": "project-3"
-            }
-          ]
+          "action_id": "button_click"
         }
       }
     ],
-    user: body.user_id
+    text: `Hey there!`
   });
+  // await app.client.chat.postEphemeral({
+  //   token: process.env.SLACK_BOT_TOKEN,
+  //   channel: body.channel_id,
+  //   text: "TEST",
+  //   blocks: [
+  //     {
+  //       "type": "section",
+  //       "block_id": "section678",
+  //       "text": {
+  //         "type": "mrkdwn",
+  //         "text": "Pick a project from the dropdown list"
+  //       },
+  //       "accessory": {
+  //         "action_id": "select-1",
+  //         "type": "static_select",
+  //         "placeholder": {
+  //           "type": "plain_text",
+  //           "text": "Select an item"
+  //         },
+  //         "options": [
+  //           {
+  //             "text": {
+  //               "type": "plain_text",
+  //               "text": "*Project 1*"
+  //             },
+  //             "value": "project-1"
+  //           },
+  //           {
+  //             "text": {
+  //               "type": "plain_text",
+  //               "text": "*Project 2*"
+  //             },
+  //             "value": "project-2"
+  //           },
+  //           {
+  //             "text": {
+  //               "type": "plain_text",
+  //               "text": "*Project 3*"
+  //             },
+  //             "value": "project-3"
+  //           }
+  //         ]
+  //       }
+  //     }
+  //   ],
+  //   user: body.user_id
+  // });
 });
 
-app.action(/select-1\d/, async ({ payload, say, ack, body, logger }) => {
-  logger.info(payload, body);
+app.action('button_click', async ({ payload, say, ack, body, logger }) => {
   ack();
+  logger.info(payload, body);
   await say("Deploy preview for any merge request is on :fire:");
 
   console.log((payload as StaticSelectAction).selected_option);
@@ -160,7 +179,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
             "text": "Pick a project from the dropdown list"
           },
           "accessory": {
-            "action_id": "select-1",
+            "action_id": "select_1",
             "type": "static_select",
             "placeholder": {
               "type": "plain_text",
