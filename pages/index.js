@@ -7,7 +7,6 @@ export default function Home() {
     e.preventDefault();
     router.push("/pokemon");
   }
-
   return (
     <>
       <Head>
