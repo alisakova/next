@@ -145,8 +145,6 @@ app.action('button_click', async ({ payload, say, ack, body, logger }) => {
   ack();
   logger.info(payload, body);
   await say("Deploy preview for any merge request is on :fire:");
-
-  console.log((payload as StaticSelectAction).selected_option);
 });
 
 app.command('/turn-on-build', async ({ body, ack }) => {
@@ -267,6 +265,8 @@ export async function handler(event) {
       body: payload.challenge
     };
   }
+
+  console.log(event);
 
   const slackEvent: ReceiverEvent = {
     body: payload,
