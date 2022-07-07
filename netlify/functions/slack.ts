@@ -268,9 +268,8 @@ export async function handler(event) {
     };
   }
 
-  console.log(result);
+  console.log(payload);
   console.log(payload.payload);
-  console.log(Object.keys(payload.payload));
 
   const slackEvent: ReceiverEvent = {
     body: result,
