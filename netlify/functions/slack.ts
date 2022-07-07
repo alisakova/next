@@ -122,7 +122,7 @@ app.command('/start', async ({ say, body, ack }) => {
   });
 });
 
-app.action('select_1', async ({ payload, say, ack, body, logger }) => {
+app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   ack();
   await say("Deploy preview for any merge request is on :fire:");
   console.log(payload);
