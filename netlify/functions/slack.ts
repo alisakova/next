@@ -259,6 +259,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
 export async function handler(event) {
   // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
+  const result = payload.payload ? parseRequestBody(payload, event.headers["content-type"]) : payload;
 
   if (payload && payload.type && payload.type === 'url_verification') {
     return {
@@ -267,10 +268,10 @@ export async function handler(event) {
     };
   }
 
-  console.log(payload);
+  console.log(result);
 
   const slackEvent: ReceiverEvent = {
-    body: payload,
+    body: result,
     ack: async (response) => {
       return new Promise((resolve, reject) => {
         resolve();
