@@ -64,6 +64,13 @@ const TURN_ON_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
+const TURN_OFF_BUILD_PAYLOAD = {
+  build_settings: {
+    skip_prs: true,
+  },
+  cdp_enabled: false
+};
+
 app.command('/turn-on-build', async ({ body, ack }) => {
   ack();
 
@@ -82,6 +89,33 @@ app.command('/turn-on-build', async ({ body, ack }) => {
       text: "Билд превью включился",
       user: body.user_id
     });
+
+    setTimeout(async () => {
+      try {
+        await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+          method: "PUT",
+          headers: {
+            Authorization: process.env.BEARER_TOKEN,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
+        });
+        await app.client.chat.postEphemeral({
+          token: process.env.SLACK_BOT_TOKEN,
+          channel: body.channel_id,
+          text: "Билд превью автоматически выключился",
+          user: body.user_id
+        });
+      } catch (error) {
+        await app.client.chat.postEphemeral({
+          token: process.env.SLACK_BOT_TOKEN,
+          channel: body.channel_id,
+          text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную",
+          user: body.user_id
+        });
+      }
+    }, 60000);
+
   } catch (error) {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
