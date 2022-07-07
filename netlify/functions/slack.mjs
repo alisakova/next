@@ -35,8 +35,22 @@ const parseRequestBody = (stringBody, contentType) => {
   }
 }
 
-app.message(async ({ say }) => {
+const replyReaction = async(channelId, messageThreadTs) => {
+  try {
+      await app.client.reactions.add({
+          token: process.env.SLACK_BOT_TOKEN,
+          name: 'robot_face',
+          channel: channelId,
+          timestamp: messageThreadTs,
+      });
+  } catch (error) {
+      console.error(error);
+  }
+}
+
+app.message(async ({ say, message }) => {
   await say("Hi :wave:");
+  await replyReaction(message.channel, message.ts);
 });
 
 const TURN_ON_BUILD_PAYLOAD = {
