@@ -71,14 +71,60 @@ const TURN_OFF_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
-app.command('/turn-off-build', async ({ body, ack }) => {
+app.command('/start', async ({ body, ack }) => {
   await app.client.chat.postEphemeral({
     token: process.env.SLACK_BOT_TOKEN,
     channel: body.channel_id,
-    text: "Билд превью автоматически выключился :new_moon_with_face",
+    blocks: [
+      {
+        "type": "section",
+        "block_id": "section678",
+        "text": {
+          "type": "mrkdwn",
+          "text": "Pick a project from the dropdown list"
+        },
+        "accessory": {
+          "action_id": "select-1",
+          "type": "static_select",
+          "placeholder": {
+            "type": "plain_text",
+            "text": "Select an item"
+          },
+          "options": [
+            {
+              "text": {
+                "type": "plain_text",
+                "text": "*Project 1*"
+              },
+              "value": "project-1"
+            },
+            {
+              "text": {
+                "type": "plain_text",
+                "text": "*Project 2*"
+              },
+              "value": "project-2"
+            },
+            {
+              "text": {
+                "type": "plain_text",
+                "text": "*Project 3*"
+              },
+              "value": "project-3"
+            }
+          ]
+        }
+      }
+    ],
     user: body.user_id
   });
-})
+});
+
+app.action('select-1', async ({ action, say, ack }) => {
+  await ack();
+  await say("Deploy preview for any merge request is on :fire:");
+  console.log(action);
+});
 
 app.command('/turn-on-build', async ({ body, ack }) => {
 
