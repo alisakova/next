@@ -66,7 +66,6 @@ const TURN_ON_BUILD_PAYLOAD = {
 
 app.command('/turn-on-build', async ({ body, ack }) => {
   ack();
-  console.log("BEARER TOKEN", process.env.BEARER_TOKEN);
 
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
