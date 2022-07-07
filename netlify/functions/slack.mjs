@@ -21,8 +21,8 @@ const parseRequestBody = (stringBody, contentType) => {
     let result = {};
 
     if (contentType && contentType === 'application/x-www-form-urlencoded') {
-      var keyValuePairs = inputStringBody.split('&');
-      keyValuePairs.forEach(function(pair) {
+      const keyValuePairs = inputStringBody.split('&');
+      keyValuePairs.forEach((pair) => {
         let individualKeyValuePair = pair.split('=');
         result[individualKeyValuePair[0]] = decodeURIComponent(individualKeyValuePair[1] || '');
       });
@@ -49,13 +49,13 @@ const TURN_ON_BUILD_PAYLOAD = {
 app.command('/turn-on-build', async({body, ack}) => {
   ack();
   try  {
-    fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+    await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
       method: "PUT",
       headers: {
         Authorization: process.env.BEARER_TOKEN,
       },
       body: JSON.stringify(TURN_ON_BUILD_PAYLOAD),
-    }).then(() => {
+    }).then(async () => {
       await app.client.chat.postEphemeral({
         token: process.env.SLACK_BOT_TOKEN,
         channel: body.channel_id,
@@ -73,7 +73,7 @@ app.command('/turn-on-build', async({body, ack}) => {
   }
 });
 
-exports.handler = async function(event, context) {
+export async function handler(event, context) {
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
 
   if (payload && payload.type && payload.type === 'url_verification') {
