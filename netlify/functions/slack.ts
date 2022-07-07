@@ -75,6 +75,7 @@ app.command('/start', async ({ body, ack }) => {
   await app.client.chat.postEphemeral({
     token: process.env.SLACK_BOT_TOKEN,
     channel: body.channel_id,
+    text: "TEST",
     blocks: [
       {
         "type": "section",
@@ -120,9 +121,11 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.action({ action_id: 'select-1' }, async ({ payload, say, ack }) => {
-  await ack();
+app.action(/select-1\d/, async ({ payload, say, ack, body, logger }) => {
+  logger.info(payload, body);
+  ack();
   await say("Deploy preview for any merge request is on :fire:");
+
   console.log((payload as StaticSelectAction).selected_option);
 });
 
