@@ -143,8 +143,8 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.event("event_callback", async ({ ack, payload, body, event }) => {
-  console.log("event_callback", event);
+app.event("message", async ({ ack, payload, body, event }) => {
+  console.log("message", event);
   if (event.text.contains("is turning off")) {
     try {
       await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
@@ -335,7 +335,6 @@ export async function handler(event) {
     };
   }
 
-  console.log(payload);
   console.log(result);
 
   const slackEvent: ReceiverEvent = {
