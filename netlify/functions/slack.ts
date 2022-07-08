@@ -119,9 +119,9 @@ app.command('/start', async ({ body, ack }) => {
 });
 
 app.message(/is turning off/, async ({ ack, say, payload, body, event }) => {
-  console.log(payload, body, event);
   const text = payload.text;
-  const project = text.substr(text.indexOf(":") + 1);
+  const project = text.substr(text.indexOf(":") + 1)[0];
+
 
   console.log("PROJECT", project);
   try {
