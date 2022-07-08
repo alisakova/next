@@ -119,7 +119,10 @@ app.command('/start', async ({ body, ack }) => {
 });
 
 app.message(/is turning off/, async ({ ack, say, payload, body, event }) => {
-  console.log("message", event, body);
+  const { text } = body;
+  const project = text.substr(text.indexOf(":") + 1);
+
+  console.log("PROJECT", project);
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
       method: "PUT",
@@ -168,7 +171,7 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
       await app.client.chat.scheduleMessage({
         channel: body.channel.id,
         post_at: scheduledMessageTimestamp,
-        text: `Deploy preview for any merge request for ${text} is turning off :dancer:`, // add wait emoji
+        text: `Deploy preview for any merge request for project:${value} is turning off :dancer:`, // add wait emoji
         user: body.user.id,
       });
     } catch (error) {
@@ -189,8 +192,6 @@ export async function handler(event) {
       body: payload.challenge
     };
   }
-
-  console.log(result);
 
   const slackEvent: ReceiverEvent = {
     body: result,
