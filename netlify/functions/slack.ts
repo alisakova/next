@@ -64,16 +64,16 @@ app.message("is turning off", async ({ ack, say, message, body }) => {
     });
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel.id,
-      text: `Deploy preview for any merge request is off :sparkles:`,
-      user: body.user.id
+      channel: body.channel,
+      text: "Deploy preview for any merge request is off :sparkles:",
+      user: body.user
     });
   } catch (error) {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel.id,
+      channel: body.channel,
       text: "Error, try later :face_with_rolling_eyes:",
-      user: body.user.id
+      user: body.user
     });
   }
 });
@@ -149,11 +149,11 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   const { value, text: { text } } = selectedOption;
 
   const currentDate = new Date();
-  const scheduledMessageDate = new Date(currentDate.getTime() + 60000);
+  const scheduledMessageDate = new Date(currentDate.getTime() + 30000);
   const scheduledMessageTimestamp = Math.floor(scheduledMessageDate.getTime() / 1000).toFixed(0);
 
   if (value === "project-1") {
-    await say("Nothing happened for project-1 :cry:");
+    await say(`Nothing happened for ${text} :cry:`);
   }
 
   if (value === "project-2") {
@@ -176,7 +176,8 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
         channel: body.channel.id,
         post_at: scheduledMessageTimestamp,
         text: `Deploy preview for any merge request for ${text} is turning off :dancer:`, // add wait emoji
-        user: body.user.id
+        user: body.user.id,
+        as_user: true,
       });
     } catch (error) {
       await app.client.chat.postEphemeral({
