@@ -125,7 +125,7 @@ app.command('/start', async ({ say, body, ack }) => {
 app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   ack();
   const selectedOption = (payload as StaticSelectAction).selected_option;
-  const { value, text } = selectedOption;
+  const { value, text: { text } } = selectedOption;
 
   if (value === "project-1") {
     await say("Nothing happened for project-1 :cry:");
