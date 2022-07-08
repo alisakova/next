@@ -118,7 +118,7 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.message(/is turning off/, async ({ ack, payload, body, event }) => {
+app.message(/is turning off/, async ({ ack, say, payload, body, event }) => {
   console.log("message", event, body);
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
@@ -129,19 +129,9 @@ app.message(/is turning off/, async ({ ack, payload, body, event }) => {
       },
       body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
     });
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.event.channel,
-      text: "Deploy preview for any merge request is off :sparkles:",
-      user: body.user.id
-    });
+    await say("Deploy preview for any merge request is off :sparkles:");
   } catch (error) {
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.event.channel,
-      text: "Error, try later :face_with_rolling_eyes:",
-      user: body.user.id
-    });
+    await say("Error, try later :face_with_rolling_eyes:");
   }
 });
 
@@ -173,12 +163,7 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
         },
         body: JSON.stringify(TURN_ON_BUILD_PAYLOAD),
       });
-      await app.client.chat.postEphemeral({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: body.channel.id,
-        text: `Deploy preview for any merge request for ${text} is on :fire:`,
-        user: body.user.id
-      });
+      await say(`Deploy preview for any merge request for ${text} is on :fire:`);
       // Delete schedule message if new action is triggered? 
       await app.client.chat.scheduleMessage({
         channel: body.channel.id,
@@ -187,12 +172,7 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
         user: body.user.id,
       });
     } catch (error) {
-      await app.client.chat.postEphemeral({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: body.channel.id,
-        text: "Error, try later :face_with_rolling_eyes:",
-        user: body.user.id
-      });
+      await say("Error, try later :face_with_rolling_eyes:");
     }
   }
 });
