@@ -143,8 +143,33 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.event("event_callback", async ({ ack, payload }) => {
-  console.log(payload);
+app.event("event_callback", async ({ ack, payload, body, event }) => {
+  console.log("event_callback", event);
+  if (event.text.contains("is turning off")) {
+    try {
+      await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+        method: "PUT",
+        headers: {
+          Authorization: process.env.BEARER_TOKEN,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
+      });
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: body.event.channel,
+        text: "Deploy preview for any merge request is off :sparkles:",
+        user: body.user.id
+      });
+    } catch (error) {
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: body.event.channel,
+        text: "Error, try later :face_with_rolling_eyes:",
+        user: body.user.id
+      });
+    }
+  }
 });
 
 app.action('select-1', async ({ payload, say, ack, body, logger }) => {
