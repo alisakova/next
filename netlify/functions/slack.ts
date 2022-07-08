@@ -13,6 +13,7 @@ const app = new App({
   signingSecret: `${process.env.SLACK_SIGNING_SECRET}`,
   token: `${process.env.SLACK_BOT_TOKEN}`,
   receiver: expressReceiver,
+  ignoreSelf: false,
 });
 
 const parseRequestBody = (stringBody: string | null, contentType: string | undefined): any | undefined => {
@@ -51,32 +52,6 @@ const replyReaction = async (channelId, messageThreadTs) => {
     console.error(error);
   }
 }
-
-app.message("is turning off", async ({ ack, say, message, body }) => {
-  try {
-    await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
-      method: "PUT",
-      headers: {
-        Authorization: process.env.BEARER_TOKEN,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
-    });
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.event.channel,
-      text: "Deploy preview for any merge request is off :sparkles:",
-      user: body.user.id
-    });
-  } catch (error) {
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.event.channel,
-      text: "Error, try later :face_with_rolling_eyes:",
-      user: body.user.id
-    });
-  }
-});
 
 const TURN_ON_BUILD_PAYLOAD = {
   build_settings: {
@@ -143,32 +118,30 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.message(async ({ ack, payload, body, event }) => {
-  console.log("message", event);
-  if (body.text.contains("is turning off")) {
-    try {
-      await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
-        method: "PUT",
-        headers: {
-          Authorization: process.env.BEARER_TOKEN,
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
-      });
-      await app.client.chat.postEphemeral({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: body.event.channel,
-        text: "Deploy preview for any merge request is off :sparkles:",
-        user: body.user.id
-      });
-    } catch (error) {
-      await app.client.chat.postEphemeral({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: body.event.channel,
-        text: "Error, try later :face_with_rolling_eyes:",
-        user: body.user.id
-      });
-    }
+app.message(/is turning off/, async ({ ack, payload, body, event }) => {
+  console.log("message", event, body);
+  try {
+    await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+      method: "PUT",
+      headers: {
+        Authorization: process.env.BEARER_TOKEN,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
+    });
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.event.channel,
+      text: "Deploy preview for any merge request is off :sparkles:",
+      user: body.user.id
+    });
+  } catch (error) {
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.event.channel,
+      text: "Error, try later :face_with_rolling_eyes:",
+      user: body.user.id
+    });
   }
 });
 
@@ -212,7 +185,6 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
         post_at: scheduledMessageTimestamp,
         text: `Deploy preview for any merge request for ${text} is turning off :dancer:`, // add wait emoji
         user: body.user.id,
-        as_user: true,
       });
     } catch (error) {
       await app.client.chat.postEphemeral({
