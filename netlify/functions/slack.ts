@@ -124,9 +124,12 @@ app.command('/start', async ({ say, body, ack }) => {
 
 app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   ack();
-  await say("Deploy preview for any merge request is on :fire:");
   const selectedOption = (payload as StaticSelectAction).selected_option;
   const { value, text } = selectedOption;
+
+  if (value === "project-1") {
+    await say("Nothing happened for project-1 :cry:");
+  }
 
   if (value === "project-2") {
     try {
