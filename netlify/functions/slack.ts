@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import fetch from "node-fetch";
-import { App, StaticSelectAction, ExpressReceiver, ReceiverEvent } from '@slack/bolt';
+import { App, StaticSelectAction, ExpressReceiver, ReceiverEvent, MessageChangedEvent } from '@slack/bolt';
 
 dotenv.config();
 
@@ -120,7 +120,7 @@ app.command('/start', async ({ body, ack }) => {
 
 app.message(/is turning off/, async ({ ack, say, payload, body, event }) => {
   console.log(payload, body, event);
-  const { text } = body;
+  const text = payload.text;
   const project = text.substr(text.indexOf(":") + 1);
 
   console.log("PROJECT", project);
