@@ -119,6 +119,7 @@ app.command('/start', async ({ body, ack }) => {
 });
 
 app.message(/is turning off/, async ({ ack, say, payload, body, event }) => {
+  console.log(payload, body, event);
   const { text } = body;
   const project = text.substr(text.indexOf(":") + 1);
 
