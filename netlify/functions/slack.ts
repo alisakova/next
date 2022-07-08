@@ -225,103 +225,6 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   }
 });
 
-app.command('/turn-on-build', async ({ body, ack }) => {
-
-  ack();
-
-  try {
-    await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
-      method: "PUT",
-      headers: {
-        Authorization: process.env.BEARER_TOKEN,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(TURN_ON_BUILD_PAYLOAD),
-    });
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel_id,
-      text: "Билд превью включился :fire:",
-      blocks: [
-        {
-          "type": "section",
-          "block_id": "section678",
-          "text": {
-            "type": "mrkdwn",
-            "text": "Pick a project from the dropdown list"
-          },
-          "accessory": {
-            "action_id": "select_1",
-            "type": "static_select",
-            "placeholder": {
-              "type": "plain_text",
-              "text": "Select an item"
-            },
-            "options": [
-              {
-                "text": {
-                  "type": "plain_text",
-                  "text": "*Project 1*"
-                },
-                "value": "project-1"
-              },
-              {
-                "text": {
-                  "type": "plain_text",
-                  "text": "*Project 2*"
-                },
-                "value": "project-2"
-              },
-              {
-                "text": {
-                  "type": "plain_text",
-                  "text": "*Project 3*"
-                },
-                "value": "project-3"
-              }
-            ]
-          }
-        }
-      ],
-      user: body.user_id
-    });
-
-    // timerId = setTimeout(async () => {
-    //   try {
-    //     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
-    //       method: "PUT",
-    //       headers: {
-    //         Authorization: process.env.BEARER_TOKEN,
-    //         "content-type": "application/json",
-    //       },
-    //       body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
-    //     });
-    //     await app.client.chat.postEphemeral({
-    //       token: process.env.SLACK_BOT_TOKEN,
-    //       channel: body.channel_id,
-    //       text: "Билд превью автоматически выключился :new_moon_with_face",
-    //       user: body.user_id
-    //     });
-    //   } catch (error) {
-    //     await app.client.chat.postEphemeral({
-    //       token: process.env.SLACK_BOT_TOKEN,
-    //       channel: body.channel_id,
-    //       text: "Запрос на отключение деплоя превью не прошел, попробуйте вручную :face_with_rolling_eyes:",
-    //       user: body.user_id
-    //     });
-    //   }
-    // }, 60000);
-
-  } catch (error) {
-    await app.client.chat.postEphemeral({
-      token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel_id,
-      text: "Запрос не прошел, повторите позже :face_with_rolling_eyes:",
-      user: body.user_id
-    });
-  }
-});
-
 export async function handler(event) {
   // почитать https://api.slack.com/authentication/verifying-requests-from-slack
   // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
@@ -338,7 +241,7 @@ export async function handler(event) {
   console.log(result);
 
   const slackEvent: ReceiverEvent = {
-    body: result.type === "event_callback" ? result.event : result,
+    body: result,
     ack: async (response) => {
       return new Promise((resolve, reject) => {
         resolve();
