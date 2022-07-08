@@ -52,7 +52,7 @@ const replyReaction = async (channelId, messageThreadTs) => {
   }
 }
 
-app.message(/is turning off\d/, async ({ ack, say, message, body }) => {
+app.message("is turning off", async ({ ack, say, message, body }) => {
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
       method: "PUT",
@@ -169,13 +169,13 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
       await app.client.chat.postEphemeral({
         token: process.env.SLACK_BOT_TOKEN,
         channel: body.channel.id,
-        text: `Deploy preview for any merge request for *${text}* is on :fire:`,
+        text: `Deploy preview for any merge request for ${text} is on :fire:`,
         user: body.user.id
       });
       await app.client.chat.scheduleMessage({
         channel: body.channel.id,
         post_at: scheduledMessageTimestamp,
-        text: `Deploy preview for any merge request for *${text}* is turning off :dancer:`, // add wait emoji
+        text: `Deploy preview for any merge request for ${text} is turning off :dancer:`, // add wait emoji
         user: body.user.id
       });
     } catch (error) {
