@@ -145,7 +145,7 @@ app.command('/start', async ({ body, ack }) => {
 
 app.event("message", async ({ ack, payload, body, event }) => {
   console.log("message", event);
-  if (event.text.contains("is turning off")) {
+  if (body.text.contains("is turning off")) {
     try {
       await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
         method: "PUT",
@@ -326,7 +326,7 @@ export async function handler(event) {
   // почитать https://api.slack.com/authentication/verifying-requests-from-slack
   // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
-  const result = payload.payload ? JSON.parse(payload.payload) : payload;;
+  const result = payload.payload ? JSON.parse(payload.payload) : payload;
 
   if (payload && payload.type && payload.type === 'url_verification') {
     return {
@@ -338,7 +338,7 @@ export async function handler(event) {
   console.log(result);
 
   const slackEvent: ReceiverEvent = {
-    body: result,
+    body: result.type === "event_callback" ? result.event : result,
     ack: async (response) => {
       return new Promise((resolve, reject) => {
         resolve();
