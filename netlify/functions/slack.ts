@@ -52,9 +52,30 @@ const replyReaction = async (channelId, messageThreadTs) => {
   }
 }
 
-app.message(async ({ say, message }) => {
-  await say("Hi :wave:");
-  await replyReaction(message.channel, message.ts);
+app.message(/is turning off\d/, async ({ ack, say, message, body }) => {
+  try {
+    await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+      method: "PUT",
+      headers: {
+        Authorization: process.env.BEARER_TOKEN,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(TURN_OFF_BUILD_PAYLOAD),
+    });
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.channel.id,
+      text: `Deploy preview for any merge request is off :sparkles:`,
+      user: body.user.id
+    });
+  } catch (error) {
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.channel.id,
+      text: "Error, try later :face_with_rolling_eyes:",
+      user: body.user.id
+    });
+  }
 });
 
 const TURN_ON_BUILD_PAYLOAD = {
@@ -71,7 +92,7 @@ const TURN_OFF_BUILD_PAYLOAD = {
   cdp_enabled: false
 };
 
-app.command('/start', async ({ say, body, ack }) => {
+app.command('/start', async ({ body, ack }) => {
   await ack();
   await app.client.chat.postEphemeral({
     token: process.env.SLACK_BOT_TOKEN,
@@ -127,6 +148,10 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   const selectedOption = (payload as StaticSelectAction).selected_option;
   const { value, text: { text } } = selectedOption;
 
+  const currentDate = new Date();
+  const scheduledMessageDate = new Date(currentDate.getTime() + 60000);
+  const scheduledMessageTimestamp = Math.floor(scheduledMessageDate.getTime() / 1000).toFixed(0);
+
   if (value === "project-1") {
     await say("Nothing happened for project-1 :cry:");
   }
@@ -144,14 +169,20 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
       await app.client.chat.postEphemeral({
         token: process.env.SLACK_BOT_TOKEN,
         channel: body.channel.id,
-        text: `Deploy preview for any merge request for ${text} is on :fire:`,
+        text: `Deploy preview for any merge request for *${text}* is on :fire:`,
+        user: body.user.id
+      });
+      await app.client.chat.scheduleMessage({
+        channel: body.channel.id,
+        post_at: scheduledMessageTimestamp,
+        text: `Deploy preview for any merge request for *${text}* is turning off :dancer:`, // add wait emoji
         user: body.user.id
       });
     } catch (error) {
       await app.client.chat.postEphemeral({
         token: process.env.SLACK_BOT_TOKEN,
         channel: body.channel.id,
-        text: "Запрос не прошел, повторите позже :face_with_rolling_eyes:",
+        text: "Error, try later :face_with_rolling_eyes:",
         user: body.user.id
       });
     }
@@ -159,10 +190,6 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
 });
 
 app.command('/turn-on-build', async ({ body, ack }) => {
-
-  const currentDate = new Date();
-  const scheduledMessageDate = new Date(currentDate.getTime() + 60000);
-  const scheduledMessageTimestamp = Math.floor(scheduledMessageDate.getTime() / 1000).toFixed(0);
 
   ack();
 
@@ -220,13 +247,6 @@ app.command('/turn-on-build', async ({ body, ack }) => {
           }
         }
       ],
-      user: body.user_id
-    });
-
-    await app.client.chat.scheduleMessage({
-      channel: body.channel_id,
-      post_at: scheduledMessageTimestamp,
-      text: '/turn-off-build',
       user: body.user_id
     });
 
