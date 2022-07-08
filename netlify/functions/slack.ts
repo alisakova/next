@@ -143,7 +143,7 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
-app.event("message", async ({ ack, payload, body, event }) => {
+app.message(async ({ ack, payload, body, event }) => {
   console.log("message", event);
   if (body.text.contains("is turning off")) {
     try {
