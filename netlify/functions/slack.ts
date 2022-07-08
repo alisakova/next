@@ -52,6 +52,10 @@ const replyReaction = async (channelId, messageThreadTs) => {
   }
 }
 
+app.action({ callback_id: callbackId }, () => {
+
+});
+
 app.message("is turning off", async ({ ack, say, message, body }) => {
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
@@ -64,16 +68,16 @@ app.message("is turning off", async ({ ack, say, message, body }) => {
     });
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel,
+      channel: body.event.channel,
       text: "Deploy preview for any merge request is off :sparkles:",
-      user: body.user
+      user: body.event.user
     });
   } catch (error) {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
-      channel: body.channel,
+      channel: body.event.channel,
       text: "Error, try later :face_with_rolling_eyes:",
-      user: body.user
+      user: body.event.user
     });
   }
 });
@@ -143,6 +147,10 @@ app.command('/start', async ({ body, ack }) => {
   });
 });
 
+app.event("event_callback", async ({ ack, payload }) => {
+  console.log(payload);
+});
+
 app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   ack();
   const selectedOption = (payload as StaticSelectAction).selected_option;
@@ -153,7 +161,12 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   const scheduledMessageTimestamp = Math.floor(scheduledMessageDate.getTime() / 1000).toFixed(0);
 
   if (value === "project-1") {
-    await say(`Nothing happened for ${text} :cry:`);
+    await app.client.chat.postEphemeral({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: body.channel.id,
+      text: `Nothing happened for ${text} :cry:`,
+      user: body.user.id
+    });
   }
 
   if (value === "project-2") {
@@ -172,6 +185,7 @@ app.action('select-1', async ({ payload, say, ack, body, logger }) => {
         text: `Deploy preview for any merge request for ${text} is on :fire:`,
         user: body.user.id
       });
+      // Delete schedule message if new action is triggered? 
       await app.client.chat.scheduleMessage({
         channel: body.channel.id,
         post_at: scheduledMessageTimestamp,
