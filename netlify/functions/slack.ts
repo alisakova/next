@@ -52,10 +52,6 @@ const replyReaction = async (channelId, messageThreadTs) => {
   }
 }
 
-app.action({ callback_id: callbackId }, () => {
-
-});
-
 app.message("is turning off", async ({ ack, say, message, body }) => {
   try {
     await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
@@ -70,14 +66,14 @@ app.message("is turning off", async ({ ack, say, message, body }) => {
       token: process.env.SLACK_BOT_TOKEN,
       channel: body.event.channel,
       text: "Deploy preview for any merge request is off :sparkles:",
-      user: body.event.user
+      user: body.user.id
     });
   } catch (error) {
     await app.client.chat.postEphemeral({
       token: process.env.SLACK_BOT_TOKEN,
       channel: body.event.channel,
       text: "Error, try later :face_with_rolling_eyes:",
-      user: body.event.user
+      user: body.user.id
     });
   }
 });
