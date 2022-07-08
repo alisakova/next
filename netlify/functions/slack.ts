@@ -125,7 +125,34 @@ app.command('/start', async ({ say, body, ack }) => {
 app.action('select-1', async ({ payload, say, ack, body, logger }) => {
   ack();
   await say("Deploy preview for any merge request is on :fire:");
-  console.log(payload);
+  const selectedOption = (payload as StaticSelectAction).selected_option;
+  const { value, text } = selectedOption;
+
+  if (value === "project-2") {
+    try {
+      await fetch("https://app.netlify.com/access-control/bb-api/api/v1/sites/8e9faadc-ba17-49b8-b9e5-b333bd2ba4eb", {
+        method: "PUT",
+        headers: {
+          Authorization: process.env.BEARER_TOKEN,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(TURN_ON_BUILD_PAYLOAD),
+      });
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: body.channel.id,
+        text: `Deploy preview for any merge request for ${text} is on :fire:`,
+        user: body.user.id
+      });
+    } catch (error) {
+      await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: body.channel.id,
+        text: "Запрос не прошел, повторите позже :face_with_rolling_eyes:",
+        user: body.user.id
+      });
+    }
+  }
 });
 
 app.command('/turn-on-build', async ({ body, ack }) => {
@@ -237,6 +264,7 @@ app.command('/turn-on-build', async ({ body, ack }) => {
 });
 
 export async function handler(event) {
+  // почитать https://api.slack.com/authentication/verifying-requests-from-slack
   // TODO проверять заголовки, что это точно слак ('user-agent': 'Slackbot 1.0 (+https://api.slack.com/robots)'), уточнить у девопсов
   const payload = parseRequestBody(event.body, event.headers["content-type"]);
   const result = payload.payload ? JSON.parse(payload.payload) : payload;;
