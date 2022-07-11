@@ -7,14 +7,12 @@ export default function Home() {
     e.preventDefault();
     router.push("/pokemon");
   }
-  console.log("current branch", process.env.BRANCH);
-  
   return (
     <>
       <Head>
         <title>My next.js site</title>
       </Head>
-      <div>Welcome</div>
+      <div>Welcome to a/b test!</div>
       <button onClick={handleClick}>Click me</button>
     </>
   )

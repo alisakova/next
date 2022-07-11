@@ -4,6 +4,7 @@
 node_modules
 *.log
 /.next/
+.env
 
 # Local Netlify folder
 .netlify
